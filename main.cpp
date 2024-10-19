@@ -46,8 +46,8 @@ void testRSA(){
     QByteArray testPublicKey = getPublicKey();
 
     Cipher cWrapper;
-    RSA* publickey = cWrapper.getPublicKey(testPublicKey);
-    RSA* privatekey = cWrapper.getPrivateKey(testPrivateKey);
+    EVP_PKEY* publickey = cWrapper.getPublicKey(testPublicKey);
+    EVP_PKEY* privatekey = cWrapper.getPrivateKey(testPrivateKey);
 
     QByteArray plain = "This is a text string";
     QByteArray encrypted = cWrapper.encryptRSA(publickey, plain);
@@ -58,14 +58,13 @@ void testRSA(){
     qDebug() << encrypted.toBase64();
     qDebug() << decrypted;
 
-    cWrapper.freeRSAKey(publickey);
-    cWrapper.freeRSAKey(privatekey);
+    cWrapper.freeEVPKey(publickey);
+    cWrapper.freeEVPKey(privatekey);
 }
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    qDebug() << "HEEEEEEEEY";
     testRSA();
     MainWindow w;
     w.show();

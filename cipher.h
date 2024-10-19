@@ -22,19 +22,17 @@ public:
     explicit Cipher(QObject *parent = nullptr);
     ~Cipher();
 
-    RSA *getPublicKey(QByteArray &data);
-    RSA *getPublicKey(QString filename);
+    EVP_PKEY *getPublicKey(QByteArray &data);
+    EVP_PKEY *getPublicKey(QString filename);
 
-    RSA *getPrivateKey(QByteArray &data);
-    RSA *getPrivateKey(QString filename);
+    EVP_PKEY *getPrivateKey(QByteArray &data);
+    EVP_PKEY *getPrivateKey(QString filename);
 
-    QByteArray encryptRSA(RSA *key, QByteArray &data);
+    QByteArray encryptRSA(EVP_PKEY *key, QByteArray &data);
 
-    QByteArray decryptRSA(RSA *key, QByteArray &data);
+    QByteArray decryptRSA(EVP_PKEY *key, QByteArray &data);
 
-    QByteArray randomBytes(int size);
-
-    void freeRSAKey(RSA *key);
+    void freeEVPKey(EVP_PKEY *key);
 
 signals:
 

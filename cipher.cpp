@@ -11,13 +11,13 @@ Cipher::~Cipher()
     finalize();
 }
 
-RSA *Cipher::getPublicKey(QByteArray &data)
+EVP_PKEY *Cipher::getPublicKey(QByteArray &data)
 {
     const char* publicKeyStr = data.constData();
     BIO* bio = BIO_new_mem_buf((void*)publicKeyStr, -1);
     BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
 
-    RSA* rsaPubKey = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+    EVP_PKEY* rsaPubKey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
     if(!rsaPubKey){
         qCritical() << "Could not load public key" << ERR_error_string(ERR_get_error(), NULL);
     }
@@ -26,19 +26,19 @@ RSA *Cipher::getPublicKey(QByteArray &data)
     return rsaPubKey;
 }
 
-RSA *Cipher::getPublicKey(QString filename)
+EVP_PKEY *Cipher::getPublicKey(QString filename)
 {
     QByteArray data = readFile(filename);
     return getPublicKey(data);
 }
 
-RSA *Cipher::getPrivateKey(QByteArray &data)
+EVP_PKEY *Cipher::getPrivateKey(QByteArray &data)
 {
     const char* privateKeyStr = data.constData();
     BIO* bio = BIO_new_mem_buf((void*)privateKeyStr, -1);
     BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
 
-    RSA* rsaPrivKey = PEM_read_bio_RSAPrivateKey(bio, NULL, NULL, NULL);
+    EVP_PKEY* rsaPrivKey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
     if(!rsaPrivKey){
         qCritical() << "Could not load private key" << ERR_error_string(ERR_get_error(), NULL);
     }
@@ -47,56 +47,95 @@ RSA *Cipher::getPrivateKey(QByteArray &data)
     return rsaPrivKey;
 }
 
-RSA *Cipher::getPrivateKey(QString filename)
+EVP_PKEY *Cipher::getPrivateKey(QString filename)
 {
     QByteArray data = readFile(filename);
     return getPrivateKey(data);
 }
 
-QByteArray Cipher::encryptRSA(RSA *key, QByteArray &data)
+QByteArray Cipher::encryptRSA(EVP_PKEY *key, QByteArray &data)
 {
     QByteArray buffer;
+    EVP_PKEY_CTX *ctx;
     int dataSize = data.length();
+    unsigned char* out;
     const unsigned char* str = (const unsigned char*)data.constData();
-    int rsaLen = RSA_size(key);
-
-    unsigned char* ed = (unsigned char*)malloc(rsaLen);
-
-    int resultLen = RSA_public_encrypt(dataSize, (const unsigned char*)str, ed, key, PADDING);
-
-    if(resultLen == -1){
-        qCritical() << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL);
-        return buffer;
+    size_t outlen;
+    ctx = EVP_PKEY_CTX_new(key, NULL);
+    if (!ctx){
+        /* Error occurred */
+    }
+    if (EVP_PKEY_encrypt_init(ctx) <= 0){
+        /* Error */
+    }
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, PADDING) <= 0){
+        /* Error */
     }
 
-    buffer = QByteArray(reinterpret_cast<char*>(ed), resultLen);
+    /* Determine buffer length */
+    if (EVP_PKEY_encrypt(ctx, NULL, &outlen, str, dataSize) <= 0){
+        /* Error */
+    }
+
+    out = (unsigned char*)OPENSSL_malloc(outlen);
+
+    if (!out){
+        /* malloc failure */
+    }
+
+    int resultLen = EVP_PKEY_encrypt(ctx, out, &outlen, str, dataSize);
+    if(resultLen <= 0) {
+        /* Error */
+    }
+
+    buffer = QByteArray(reinterpret_cast<char*>(out), outlen);
 
     return buffer;
 }
 
-QByteArray Cipher::decryptRSA(RSA *key, QByteArray &data)
+QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
 {
     QByteArray buffer;
+    EVP_PKEY_CTX *ctx;
+    int dataSize = data.length();
     const unsigned char* encryptedData = (const unsigned char*)data.constData();
-    int rsaLen = RSA_size(key);
+    size_t outlen;
+    ctx = EVP_PKEY_CTX_new(key, NULL);
 
-    unsigned char* ed = (unsigned char*)malloc(rsaLen);
+    if (!ctx){
+        /* Error occurred */
+    }
+    if (EVP_PKEY_decrypt_init(ctx) <= 0){
+        /* Error */
+    }
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, PADDING) <= 0){
+        /* Error */
+    }
 
-    int resultLen = RSA_private_decrypt(rsaLen, encryptedData, ed, key, PADDING);
+    /* Determine buffer length */
+    if (EVP_PKEY_decrypt(ctx, NULL, &outlen, encryptedData, dataSize) <= 0){
+        /* Error */
+    }
 
-    if(resultLen == -1){
-        qCritical() << "Could not dencrypt: " << ERR_error_string(ERR_get_error(), NULL);
+    unsigned char* out = (unsigned char*)OPENSSL_malloc(outlen);
+
+    if (!out){
+        /* malloc failure */
+    }
+    int resultLen = EVP_PKEY_decrypt(ctx, out, &outlen, encryptedData, dataSize);
+    if(resultLen <= 0){
+        qCritical() << "Could not decrypt: " << ERR_error_string(ERR_get_error(), NULL);
         return buffer;
     }
 
-    buffer = QByteArray::fromRawData((const char*)ed, resultLen);
+    buffer = QByteArray::fromRawData((const char*)out, outlen);
 
     return buffer;
 }
 
-void Cipher::freeRSAKey(RSA *key)
+void Cipher::freeEVPKey(EVP_PKEY *key)
 {
-    RSA_free(key);
+    EVP_PKEY_free(key);
 }
 
 void Cipher::initialize()
