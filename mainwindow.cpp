@@ -3,7 +3,8 @@
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 
-#define FILTERS "Text Files (*.txt) ;; All Files (*.*) ;; XML Files (*.xml)";
+#define FILEFILTERS "Text Files (*.txt) ;; All Files (*.*) ;; XML Files (*.xml)";
+#define KEYFILTERS "Text Files (*.txt) ;; All Files (*.*) ;; XML Files (*.xml)";
 
 QByteArray getPublicKey()
 {
@@ -86,6 +87,8 @@ QByteArray getPrivateKey()
     return testPrivateKey;
 }
 
+QByteArray keyBuffer;
+
 void testRSA(){
     qDebug() << "Loading keys...";
     QByteArray testPrivateKey = getPrivateKey();
@@ -123,7 +126,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     Cipher cWrapper;
-    QString filters = FILTERS;
+    QString filters = FILEFILTERS;
     QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), filters);
     QByteArray data = cWrapper.readFile(fp);
     ui->plainTextEdit->setPlainText(QString::fromUtf8(data));
@@ -133,9 +136,13 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     qDebug() << "Loading keys...";
-    QByteArray testPublicKey = getPublicKey();
+    //QByteArray testPublicKey = getPublicKey();
     Cipher cWrapper;
-    EVP_PKEY* publickey = cWrapper.getPublicKey(testPublicKey);
+    QByteArray key;
+    if(!keyBuffer.isNull()){
+        key = keyBuffer;
+    } else key = getPublicKey();
+    EVP_PKEY* publickey = cWrapper.getPublicKey(key);
     QByteArray data = ui->plainTextEdit->toPlainText().toUtf8();
     qDebug() << "Encrypting...";
     QByteArray ed = cWrapper.encryptRSA(publickey, data).toBase64();
@@ -159,3 +166,21 @@ void MainWindow::on_pushButton_3_clicked()
     cWrapper.freeEVPKey(privatekey);
     ui->plainTextEdit_3->setPlainText(QString::fromUtf8(decrypted));
 }
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    Cipher cWrapper;
+    QString filters = KEYFILTERS;
+    QString fp = QFileDialog::getOpenFileName(this, "Open public or private key", QDir::homePath(), filters);
+    ui->textBrowser->setPlainText(fp);
+    QByteArray data = cWrapper.readFile(fp);
+    keyBuffer = data;
+}
+
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    keyBuffer = NULL;
+    ui->textBrowser->setPlainText("");
+}
+
