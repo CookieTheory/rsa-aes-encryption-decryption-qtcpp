@@ -34,6 +34,10 @@ public:
 
     void freeEVPKey(EVP_PKEY *key);
 
+    QByteArray readFile(QString filename);
+
+    void writeFile(QString filename, QByteArray &data);
+
 signals:
 
 private:
@@ -41,10 +45,6 @@ private:
     void initialize();
 
     void finalize();
-
-    QByteArray readFile(QString filename);
-
-    void writeFile(QString filename, QByteArray &data);
 };
 
 #endif // CIPHER_H

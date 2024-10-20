@@ -167,5 +167,13 @@ QByteArray Cipher::readFile(QString filename)
 
 void Cipher::writeFile(QString filename, QByteArray &data)
 {
+    QFile file(filename);
+    if(!file.open(QFile::WriteOnly))
+    {
+        qCritical() << file.errorString();
+        return;
+    }
 
+    file.write(data);
+    file.close();
 }
