@@ -1,7 +1,7 @@
 #include "cipher.h"
 
 Cipher::Cipher(QObject *parent)
-    : QObject{parent}
+: QObject{parent}
 {
     initialize();
 }
@@ -131,6 +131,21 @@ QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
     buffer = QByteArray::fromRawData((const char*)out, outlen);
 
     return buffer;
+}
+
+EVP_PKEY *Cipher::createRSAKeyPair()
+{
+    EVP_PKEY_CTX* pctx;
+    EVP_PKEY* rsaKeyPair = NULL;
+    if(!(pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL))) qWarning() << "no id rsa";
+    if(!EVP_PKEY_keygen_init(pctx)) qWarning() << "no keygen init";
+    //if(!EVP_PKEY_paramgen_init(pctx)) qWarning() << "no param init";
+
+    EVP_PKEY_CTX_set_rsa_padding(pctx, PADDING);
+    EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, KEYSIZE);
+    EVP_PKEY_keygen(pctx, &rsaKeyPair);
+
+    return rsaKeyPair;
 }
 
 void Cipher::freeEVPKey(EVP_PKEY *key)

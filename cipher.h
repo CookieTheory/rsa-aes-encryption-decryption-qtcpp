@@ -14,6 +14,7 @@
 #include <openssl/decoder.h>
 
 #define PADDING RSA_PKCS1_PADDING
+#define KEYSIZE 4096
 
 class Cipher : public QObject
 {
@@ -31,6 +32,8 @@ public:
     QByteArray encryptRSA(EVP_PKEY *key, QByteArray &data);
 
     QByteArray decryptRSA(EVP_PKEY *key, QByteArray &data);
+
+    EVP_PKEY *createRSAKeyPair();
 
     void freeEVPKey(EVP_PKEY *key);
 

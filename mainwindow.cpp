@@ -1,16 +1,17 @@
 #include "mainwindow.h"
 #include "cipher.h"
 #include "./ui_mainwindow.h"
+#include <fstream>
 #include <QFileDialog>
 
-#define FILEFILTERS "Text Files (*.txt) ;; All Files (*.*) ;; XML Files (*.xml)";
-#define KEYFILTERS "Text Files (*.txt) ;; All Files (*.*) ;; XML Files (*.xml)";
+#define FILEFILTERS "Text Files (*.txt) ;; All Files (*) ;; XML Files (*.xml)"
+#define KEYFILTERS "Pem Files (*.pem);;Text Files (*.txt);;All Files(*)"
 
 QByteArray keyBuffer;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+: QMainWindow(parent)
+, ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 }
@@ -81,5 +82,31 @@ void MainWindow::on_pushButton_5_clicked()
 {
     keyBuffer = NULL;
     ui->textBrowser->setPlainText("");
+}
+
+
+void MainWindow::on_pushButton_6_clicked()
+{
+    Cipher cWrapper;
+    EVP_PKEY *rsaKeyPair = cWrapper.createRSAKeyPair();
+    QString fpPub = QFileDialog::getSaveFileName(this, "Choose save location for public key", QDir::homePath(), KEYFILTERS);
+    if (fpPub.isEmpty()) return;
+
+    BIO *bioPub = BIO_new_file(fpPub.toStdString().c_str(), "w");
+    if (PEM_write_bio_PUBKEY(bioPub, rsaKeyPair) == 0) {
+        qDebug() << "Error writing public key to file.";
+    }
+
+    QString fpPriv = QFileDialog::getSaveFileName(this, "Choose save location for private key", QDir::homePath(), KEYFILTERS);
+    if (fpPriv.isEmpty()) return;
+
+    BIO *bioPriv = BIO_new_file(fpPriv.toStdString().c_str(), "w");
+    if (PEM_write_bio_PrivateKey(bioPriv, rsaKeyPair, nullptr, nullptr, 0, nullptr, nullptr) == 0) {
+        qDebug() << "Error writing private key to file.";
+    }
+
+    BIO_free(bioPub);
+    BIO_free(bioPriv);
+    EVP_PKEY_free(rsaKeyPair);
 }
 
