@@ -33,7 +33,7 @@ public:
 
     QByteArray decryptRSA(EVP_PKEY *key, QByteArray &data);
 
-    EVP_PKEY *createRSAKeyPair();
+    EVP_PKEY *createRSAKeyPair(int key_size);
 
     void freeEVPKey(EVP_PKEY *key);
 

@@ -18,17 +18,17 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_button_openFile_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_button_encrypt_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_button_decrypt_clicked();
 
-    void on_pushButton_4_clicked();
+    void on_button_loadKey_clicked();
 
-    void on_pushButton_5_clicked();
+    void on_button_deleteKey_clicked();
 
-    void on_pushButton_6_clicked();
+    void on_button_keyGeneration_clicked();
 
 private:
     Ui::MainWindow *ui;

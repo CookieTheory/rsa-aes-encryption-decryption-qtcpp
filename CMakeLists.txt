@@ -43,6 +43,9 @@ else()
         add_executable(rsa-encryption-decryption-qtcpp
             ${PROJECT_SOURCES}
             cipher.h cipher.cpp
+            basiccustomdialog.h
+            basiccustomdialog.cpp
+            basiccustomdialog.ui
         )
     endif()
 endif()

@@ -133,7 +133,7 @@ QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
     return buffer;
 }
 
-EVP_PKEY *Cipher::createRSAKeyPair()
+EVP_PKEY *Cipher::createRSAKeyPair(int key_size)
 {
     EVP_PKEY_CTX* pctx;
     EVP_PKEY* rsaKeyPair = NULL;
@@ -142,7 +142,7 @@ EVP_PKEY *Cipher::createRSAKeyPair()
     //if(!EVP_PKEY_paramgen_init(pctx)) qWarning() << "no param init";
 
     EVP_PKEY_CTX_set_rsa_padding(pctx, PADDING);
-    EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, KEYSIZE);
+    EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, key_size);
     EVP_PKEY_keygen(pctx, &rsaKeyPair);
 
     return rsaKeyPair;
