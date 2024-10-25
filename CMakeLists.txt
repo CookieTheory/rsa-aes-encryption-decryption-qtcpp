@@ -46,6 +46,8 @@ else()
             basiccustomdialog.h
             basiccustomdialog.cpp
             basiccustomdialog.ui
+
+            icon.qrc
         )
     endif()
 endif()

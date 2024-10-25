@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>Resources/RSA.svg</file>
+    </qresource>
+</RCC>

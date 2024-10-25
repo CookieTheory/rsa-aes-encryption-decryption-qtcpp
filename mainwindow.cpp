@@ -70,8 +70,7 @@ void MainWindow::on_button_decrypt_clicked()
 void MainWindow::on_button_loadKey_clicked()
 {
     Cipher cWrapper;
-    QString filters = KEYFILTERS;
-    QString fp = QFileDialog::getOpenFileName(this, "Open public or private key", QDir::homePath(), filters);
+    QString fp = QFileDialog::getOpenFileName(this, "Open public or private key", QDir::homePath(), KEYFILTERS);
     ui->textBrowser->setPlainText(fp);
     QByteArray data = cWrapper.readFile(fp);
     keyBuffer = data;
