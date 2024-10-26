@@ -82,7 +82,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
             <item>
-             <widget class="QTextBrowser" name="textBrowser">
+             <widget class="QTextBrowser" name="textBrowser_keyPath">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -177,7 +177,20 @@
         </layout>
        </item>
        <item>
-        <widget class="QPlainTextEdit" name="textEdit_output"/>
+        <widget class="QTextBrowser" name="textEdit_output"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="button_saveFile">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Save File</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -216,7 +229,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Test key generation</string>
+          <string>Generate Key Pair</string>
          </property>
         </widget>
        </item>

@@ -24,8 +24,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_button_openFile_clicked()
 {
     Cipher cWrapper;
-    QString filters = FILEFILTERS;
-    QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), filters);
+    QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), FILEFILTERS);
     QByteArray data = cWrapper.readFile(fp);
     ui->textEdit_input->setPlainText(QString::fromUtf8(data));
 }
@@ -71,7 +70,7 @@ void MainWindow::on_button_loadKey_clicked()
 {
     Cipher cWrapper;
     QString fp = QFileDialog::getOpenFileName(this, "Open public or private key", QDir::homePath(), KEYFILTERS);
-    ui->textBrowser->setPlainText(fp);
+    ui->textBrowser_keyPath->setPlainText(fp);
     QByteArray data = cWrapper.readFile(fp);
     keyBuffer = data;
 }
@@ -79,7 +78,7 @@ void MainWindow::on_button_loadKey_clicked()
 void MainWindow::on_button_deleteKey_clicked()
 {
     keyBuffer = NULL;
-    ui->textBrowser->setPlainText("");
+    ui->textBrowser_keyPath->setPlainText("");
 }
 
 void MainWindow::on_button_keyGeneration_clicked()
@@ -106,3 +105,14 @@ void MainWindow::on_button_keyGeneration_clicked()
     BIO_free(bioPriv);
     EVP_PKEY_free(rsaKeyPair);
 }
+
+void MainWindow::on_button_saveFile_clicked()
+{
+    Cipher cWrapper;
+    QByteArray data = ui->textEdit_output->toPlainText().toUtf8();
+    if(data.isEmpty()) return;
+    QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS);
+    if (saveFile.isEmpty()) return;
+    cWrapper.writeFile(saveFile, data);
+}
+

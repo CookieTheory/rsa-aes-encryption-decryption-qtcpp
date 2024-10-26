@@ -30,6 +30,8 @@ private slots:
 
     void on_button_keyGeneration_clicked();
 
+    void on_button_saveFile_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
