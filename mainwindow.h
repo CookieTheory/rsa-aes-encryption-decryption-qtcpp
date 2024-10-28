@@ -1,6 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QSystemTrayIcon>
+
+#ifndef QT_NO_SYSTEMTRAYICON
+
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -34,5 +38,16 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    void createTrayIcon();
+
+    QAction *minimizeAction;
+    QAction *maximizeAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
 };
+#endif // QT_NO_SYSTEMTRAYICON
 #endif // MAINWINDOW_H

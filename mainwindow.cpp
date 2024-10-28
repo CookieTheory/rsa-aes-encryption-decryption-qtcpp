@@ -4,6 +4,9 @@
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 
+#ifndef QT_NO_SYSTEMTRAYICON
+#include <QMenu>
+
 #define FILEFILTERS "Text Files (*.txt) ;; All Files (*) ;; XML Files (*.xml)"
 #define KEYFILTERS "Pem Files (*.pem);;Text Files (*.txt);;All Files(*)"
 
@@ -115,4 +118,19 @@ void MainWindow::on_button_saveFile_clicked()
     if (saveFile.isEmpty()) return;
     cWrapper.writeFile(saveFile, data);
 }
+
+void MainWindow::createTrayIcon()
+{
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(minimizeAction);
+    trayIconMenu->addAction(maximizeAction);
+    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayIconMenu);
+}
+
+#endif
 
