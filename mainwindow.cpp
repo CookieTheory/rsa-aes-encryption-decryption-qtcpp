@@ -17,11 +17,34 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    createActions();
+    createTrayIcon();
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    setIcon(QIcon(":/Resources/RSA.svg"));
+
+    trayIcon->show();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setIcon(QIcon icon)
+{
+    trayIcon->setIcon(icon);
+}
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        this->showNormal();
+        break;
+    default:
+        ;
+    }
 }
 
 void MainWindow::on_button_openFile_clicked()
@@ -117,6 +140,21 @@ void MainWindow::on_button_saveFile_clicked()
     QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS);
     if (saveFile.isEmpty()) return;
     cWrapper.writeFile(saveFile, data);
+}
+
+void MainWindow::createActions()
+{
+    minimizeAction = new QAction(tr("Mi&nimize"), this);
+    connect(minimizeAction, &QAction::triggered, this, &QWidget::hide);
+
+    maximizeAction = new QAction(tr("Ma&ximize"), this);
+    connect(maximizeAction, &QAction::triggered, this, &QWidget::showMaximized);
+
+    restoreAction = new QAction(tr("&Restore"), this);
+    connect(restoreAction, &QAction::triggered, this, &QWidget::showNormal);
+
+    quitAction = new QAction(tr("&Quit"), this);
+    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 }
 
 void MainWindow::createTrayIcon()

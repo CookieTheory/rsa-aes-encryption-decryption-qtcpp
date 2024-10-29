@@ -22,6 +22,9 @@ public:
     ~MainWindow();
 
 private slots:
+    void setIcon(QIcon icon);
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+
     void on_button_openFile_clicked();
 
     void on_button_encrypt_clicked();
@@ -39,6 +42,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    void createActions();
     void createTrayIcon();
 
     QAction *minimizeAction;
