@@ -113,6 +113,7 @@ void MainWindow::on_button_keyGeneration_clicked()
     EVP_PKEY *rsaKeyPair = cWrapper.createRSAKeyPair(ui->comboBox_keySize->currentText().toInt());
     QString fpPub = QFileDialog::getSaveFileName(this, "Choose save location for public key", QDir::homePath(), KEYFILTERS);
     if (fpPub.isEmpty()) return;
+    if (fpPub.split(".").length() < 2) fpPub.append(".pem");
 
     BIO *bioPub = BIO_new_file(fpPub.toStdString().c_str(), "w");
     if (PEM_write_bio_PUBKEY(bioPub, rsaKeyPair) == 0) {
@@ -121,6 +122,7 @@ void MainWindow::on_button_keyGeneration_clicked()
 
     QString fpPriv = QFileDialog::getSaveFileName(this, "Choose save location for private key", QDir::homePath(), KEYFILTERS);
     if (fpPriv.isEmpty()) return;
+    if (fpPriv.split(".").length() < 2) fpPriv.append(".pem");
 
     BIO *bioPriv = BIO_new_file(fpPriv.toStdString().c_str(), "w");
     if (PEM_write_bio_PrivateKey(bioPriv, rsaKeyPair, nullptr, nullptr, 0, nullptr, nullptr) == 0) {
@@ -139,6 +141,7 @@ void MainWindow::on_button_saveFile_clicked()
     if(data.isEmpty()) return;
     QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS);
     if (saveFile.isEmpty()) return;
+    if (saveFile.split(".").length() < 2) saveFile.append(".txt");
     cWrapper.writeFile(saveFile, data);
 }
 
