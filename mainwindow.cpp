@@ -7,8 +7,9 @@
 #ifndef QT_NO_SYSTEMTRAYICON
 #include <QMenu>
 
-#define FILEFILTERS "Text Files (*.txt) ;; All Files (*) ;; XML Files (*.xml)"
-#define KEYFILTERS "Pem Files (*.pem);;Text Files (*.txt);;All Files(*)"
+#define FILEFILTERS "Text Files (*.txt);;All Files (*.*);;XML Files (*.xml)"
+#define KEYFILTERS "Pem Files (*.pem);;Text Files (*.txt);;All Files(*.*)"
+#define DEFAULTKEYFILTER "Pem Files (*.pem)"
 
 QByteArray keyBuffer;
 
@@ -110,19 +111,23 @@ void MainWindow::on_button_deleteKey_clicked()
 void MainWindow::on_button_keyGeneration_clicked()
 {
     Cipher cWrapper;
+    QString selectedFilter = "Pem Files (*.pem)";
+    QString filterHumanReadable;
     EVP_PKEY *rsaKeyPair = cWrapper.createRSAKeyPair(ui->comboBox_keySize->currentText().toInt());
-    QString fpPub = QFileDialog::getSaveFileName(this, "Choose save location for public key", QDir::homePath(), KEYFILTERS);
+    QString fpPub = QFileDialog::getSaveFileName(this, "Choose save location for public key", QDir::homePath(), KEYFILTERS, &selectedFilter);
     if (fpPub.isEmpty()) return;
-    if (fpPub.split(".").length() < 2) fpPub.append(".pem");
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (fpPub.split(".").length() < 2) fpPub.append(filterHumanReadable);
 
     BIO *bioPub = BIO_new_file(fpPub.toStdString().c_str(), "w");
     if (PEM_write_bio_PUBKEY(bioPub, rsaKeyPair) == 0) {
         qWarning() << "Error writing public key to file.";
     }
 
-    QString fpPriv = QFileDialog::getSaveFileName(this, "Choose save location for private key", QDir::homePath(), KEYFILTERS);
+    QString fpPriv = QFileDialog::getSaveFileName(this, "Choose save location for private key", QDir::homePath(), KEYFILTERS, &selectedFilter);
     if (fpPriv.isEmpty()) return;
-    if (fpPriv.split(".").length() < 2) fpPriv.append(".pem");
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (fpPriv.split(".").length() < 2) fpPriv.append(filterHumanReadable);
 
     BIO *bioPriv = BIO_new_file(fpPriv.toStdString().c_str(), "w");
     if (PEM_write_bio_PrivateKey(bioPriv, rsaKeyPair, nullptr, nullptr, 0, nullptr, nullptr) == 0) {
