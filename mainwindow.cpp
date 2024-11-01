@@ -10,6 +10,7 @@
 #define FILEFILTERS "Text Files (*.txt);;All Files (*.*);;XML Files (*.xml)"
 #define KEYFILTERS "Pem Files (*.pem);;Text Files (*.txt);;All Files(*.*)"
 #define DEFAULTKEYFILTER "Pem Files (*.pem)"
+#define DEFAULTFILEFILTER "Text Files (*.txt)"
 
 QByteArray keyBuffer;
 
@@ -111,7 +112,7 @@ void MainWindow::on_button_deleteKey_clicked()
 void MainWindow::on_button_keyGeneration_clicked()
 {
     Cipher cWrapper;
-    QString selectedFilter = "Pem Files (*.pem)";
+    QString selectedFilter = DEFAULTKEYFILTER;
     QString filterHumanReadable;
     EVP_PKEY *rsaKeyPair = cWrapper.createRSAKeyPair(ui->comboBox_keySize->currentText().toInt());
     QString fpPub = QFileDialog::getSaveFileName(this, "Choose save location for public key", QDir::homePath(), KEYFILTERS, &selectedFilter);
@@ -144,9 +145,12 @@ void MainWindow::on_button_saveFile_clicked()
     Cipher cWrapper;
     QByteArray data = ui->textEdit_output->toPlainText().toUtf8();
     if(data.isEmpty()) return;
-    QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS);
+    QString selectedFilter = DEFAULTFILEFILTER;
+    QString filterHumanReadable;
+    QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS, &selectedFilter);
     if (saveFile.isEmpty()) return;
-    if (saveFile.split(".").length() < 2) saveFile.append(".txt");
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (saveFile.split(".").length() < 2) saveFile.append(filterHumanReadable);
     cWrapper.writeFile(saveFile, data);
 }
 
