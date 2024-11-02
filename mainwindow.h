@@ -39,6 +39,12 @@ private slots:
 
     void on_button_saveFile_clicked();
 
+    void on_button_openFileAES_clicked();
+
+    void on_button_loadKeyAES_clicked();
+
+    void on_button_saveFileAES_clicked();
+
 private:
     Ui::MainWindow *ui;
 

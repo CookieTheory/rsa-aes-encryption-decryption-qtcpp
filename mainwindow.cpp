@@ -13,6 +13,7 @@
 #define DEFAULTFILEFILTER "Text Files (*.txt)"
 
 QByteArray keyBuffer;
+QByteArray AESBuffer;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -182,5 +183,41 @@ void MainWindow::createTrayIcon()
     trayIcon->setContextMenu(trayIconMenu);
 }
 
+/**
+ * @chapter AES Encryption/Decryption
+ */
+
+void MainWindow::on_button_openFileAES_clicked()
+{
+    Cipher cWrapper;
+    QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), FILEFILTERS);
+    QByteArray data = cWrapper.readFile(fp);
+    ui->textEdit_input_2->setPlainText(QString::fromUtf8(data));
+}
+
 #endif
+
+void MainWindow::on_button_loadKeyAES_clicked()
+{
+    Cipher cWrapper;
+    QString fp = QFileDialog::getOpenFileName(this, "Open AES key", QDir::homePath(), KEYFILTERS);
+    ui->textBrowser_keyPathAES->setPlainText(fp);
+    QByteArray data = cWrapper.readFile(fp);
+    AESBuffer = data;
+}
+
+
+void MainWindow::on_button_saveFileAES_clicked()
+{
+    Cipher cWrapper;
+    QByteArray data = ui->textEdit_output_2->toPlainText().toUtf8();
+    if(data.isEmpty()) return;
+    QString selectedFilter = DEFAULTFILEFILTER;
+    QString filterHumanReadable;
+    QString saveFile = QFileDialog::getSaveFileName(this, "Save as...", QDir::homePath(), FILEFILTERS, &selectedFilter);
+    if (saveFile.isEmpty()) return;
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (saveFile.split(".").length() < 2) saveFile.append(filterHumanReadable);
+    cWrapper.writeFile(saveFile, data);
+}
 
