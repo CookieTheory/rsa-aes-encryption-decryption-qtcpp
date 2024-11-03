@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>892</width>
-    <height>562</height>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -314,7 +314,7 @@
                </size>
               </property>
               <property name="title">
-               <string>Public or private key:</string>
+               <string>AES Key:</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0">
                <item>
@@ -425,6 +425,28 @@
             </property>
             <property name="text">
              <string>Save File</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_keyGenerationAES">
+         <property name="title">
+          <string>AES key generation</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QPushButton" name="button_keyGenerationAES">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Generate AES Key</string>
             </property>
            </widget>
           </item>
