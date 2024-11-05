@@ -3,10 +3,25 @@
 #include <QApplication>
 
 #include <QMessageBox>
+#include "cipher.h"
+
+void testAES()
+{
+    qDebug() << "Testing AES...";
+    Cipher cWrapper;
+    QString passphrase = "password";
+    QByteArray plain = "This is a test string!";
+
+    QByteArray encryped = cWrapper.encryptAES(passphrase.toUtf8(), plain);
+
+    qDebug() << plain;
+    qDebug() << encryped.toBase64();
+}
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    testAES();
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         auto choice = QMessageBox::critical(nullptr, QObject::tr("Systray"),

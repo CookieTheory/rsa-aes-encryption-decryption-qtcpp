@@ -151,7 +151,7 @@ QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
         return QByteArray();
     }
 
-    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(ctx);
 
     if(!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
