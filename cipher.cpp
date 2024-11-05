@@ -133,6 +133,79 @@ QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
     return buffer;
 }
 
+QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
+{
+    QByteArray msalt = randomBytes(SALTSIZE);
+    int rounds = 1;
+    unsigned char key[KEYSIZE];
+    unsigned char iv[IVSIZE];
+
+    const unsigned char* salt = (const unsigned char*) msalt.constData();
+    const unsigned char* password = (const unsigned char*) passphrase.constData();
+
+    int i = EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, password, passphrase.length(), rounds, key, iv);
+
+    if(i != KEYSIZE)
+    {
+        qCritical() << "EVP_BytesToKey() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX_init(ctx);
+
+    if(!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+    {
+        qCritical() << "EVP_EncryptInit_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    char *input = data.data();
+    char *out;
+    int len = data.size();
+
+    int c_len = len + AES_BLOCK_SIZE, f_len = 0;
+    unsigned char *ciphertext = (unsigned char*)malloc(c_len);
+
+    if(!EVP_EncryptInit_ex(ctx, NULL, NULL, NULL, NULL))
+    {
+        qCritical() << "EVP_EncryptInit_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    if(!EVP_EncryptUpdate(ctx, ciphertext, &c_len, (unsigned char *)input, len))
+    {
+        qCritical() << "EVP_EncryptUpdate() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    if(!EVP_EncryptFinal(ctx, ciphertext + c_len, &f_len))
+    {
+        qCritical() << "EVP_EncryptFinal() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    len = c_len + f_len;
+    out = (char*)ciphertext;
+    EVP_CIPHER_CTX_cipher(ctx);
+
+    QByteArray finished;
+    finished.append("Salted__");
+    finished.append(msalt);
+    finished.append(out, len);
+
+    return finished;
+}
+
+QByteArray Cipher::randomBytes(int size)
+{
+    unsigned char arr[size];
+    RAND_bytes(arr, size);
+
+    QByteArray ranBytes = QByteArray(reinterpret_cast<char*>(arr), size);
+    return ranBytes;
+}
+
 EVP_PKEY *Cipher::createRSAKeyPair(int key_size)
 {
     EVP_PKEY_CTX* pctx;

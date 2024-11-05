@@ -12,9 +12,13 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/decoder.h>
+#include <openssl/aes.h>
 
 #define PADDING RSA_PKCS1_PADDING
-#define KEYSIZE 4096
+#define KEYSIZE 32
+#define IVSIZE 32
+#define BLOCKSIZE 256
+#define SALTSIZE 8
 
 class Cipher : public QObject
 {
@@ -32,6 +36,12 @@ public:
     QByteArray encryptRSA(EVP_PKEY *key, QByteArray &data);
 
     QByteArray decryptRSA(EVP_PKEY *key, QByteArray &data);
+
+    QByteArray encryptAES(QByteArray passphrase, QByteArray &data);
+
+    QByteArray decryptAES(QByteArray passphrase, QByteArray &data);
+
+    QByteArray randomBytes(int size);
 
     EVP_PKEY *createRSAKeyPair(int key_size);
 
