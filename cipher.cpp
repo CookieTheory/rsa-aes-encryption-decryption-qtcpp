@@ -161,7 +161,6 @@ QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
     }
 
     char *input = data.data();
-    char *out;
     int len = data.size();
 
     int c_len = len + AES_BLOCK_SIZE, f_len = 0;
@@ -186,15 +185,80 @@ QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
     }
 
     len = c_len + f_len;
-    out = (char*)ciphertext;
     EVP_CIPHER_CTX_cipher(ctx);
 
+    QByteArray encrypted = QByteArray(reinterpret_cast<char*>(ciphertext), len);
     QByteArray finished;
     finished.append("Salted__");
     finished.append(msalt);
-    finished.append(out, len);
+    finished.append(encrypted);
 
     return finished;
+}
+
+QByteArray Cipher::decryptAES(QByteArray passphrase, QByteArray &data)
+{
+    QByteArray msalt;
+    if(QString(data.mid(0,8)) == "Salted__")
+    {
+        msalt = data.mid(8,8);
+        data = data.mid(16);
+    }
+    else
+    {
+        qWarning() << "Could not load salt from data!";
+        msalt = randomBytes(SALTSIZE);
+    }
+
+    int rounds = 1;
+    unsigned char key[KEYSIZE];
+    unsigned char iv[IVSIZE];
+
+    const unsigned char* salt = (const unsigned char*) msalt.constData();
+    const unsigned char* password = (const unsigned char*) passphrase.constData();
+
+    int i = EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, password, passphrase.length(), rounds, key, iv);
+
+    if(i != KEYSIZE)
+    {
+        qCritical() << "EVP_BytesToKey() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    EVP_CIPHER_CTX *de = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(de);
+
+    if(!EVP_DecryptInit_ex(de, EVP_aes_256_cbc(), NULL, key, iv))
+    {
+        qCritical() << "EVP_DecryptInit_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    char *input = data.data();
+    int len = data.size();
+
+    int p_len = len, f_len = 0;
+    unsigned char *plaintext = (unsigned char *)malloc(p_len + AES_BLOCK_SIZE);
+
+    if(!EVP_DecryptUpdate(de, plaintext, &p_len, (unsigned char*)input, len))
+    {
+        qCritical() << "EVP_DecryptUpdate() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    if(!EVP_DecryptFinal_ex(de, plaintext + p_len, &f_len))
+    {
+        qCritical() << "EVP_DecryptFinal_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        return QByteArray();
+    }
+
+    len = p_len + f_len;
+    EVP_CIPHER_CTX_cleanup(de);
+
+    QByteArray decrypted = QByteArray(reinterpret_cast<char *>(plaintext), len);
+
+    return decrypted;
+
 }
 
 QByteArray Cipher::randomBytes(int size)

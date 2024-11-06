@@ -12,10 +12,12 @@ void testAES()
     QString passphrase = "password";
     QByteArray plain = "This is a test string!";
 
-    QByteArray encryped = cWrapper.encryptAES(passphrase.toUtf8(), plain);
+    QByteArray encrypted = cWrapper.encryptAES(passphrase.toUtf8(), plain);
+    QByteArray decrypted = cWrapper.decryptAES(passphrase.toUtf8(), encrypted);
 
     qDebug() << plain;
-    qDebug() << encryped.toBase64();
+    qDebug() << encrypted.toBase64();
+    qDebug() << decrypted;
 }
 
 int main(int argc, char *argv[])
