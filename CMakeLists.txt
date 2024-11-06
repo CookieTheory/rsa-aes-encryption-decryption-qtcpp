@@ -21,6 +21,11 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        cipher.h cipher.cpp
+        basiccustomdialog.h
+        basiccustomdialog.cpp
+        basiccustomdialog.ui
+        icon.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
