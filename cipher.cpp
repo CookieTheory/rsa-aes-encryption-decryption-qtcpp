@@ -85,10 +85,13 @@ QByteArray Cipher::encryptRSA(EVP_PKEY *key, QByteArray &data)
 
     int resultLen = EVP_PKEY_encrypt(ctx, out, &outlen, str, dataSize);
     if(resultLen <= 0) {
-        /* Error */
+        qCritical() << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL);
+        free(out);
+        return buffer;
     }
 
     buffer = QByteArray(reinterpret_cast<char*>(out), outlen);
+    free(out);
 
     return buffer;
 }
@@ -125,10 +128,12 @@ QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
     int resultLen = EVP_PKEY_decrypt(ctx, out, &outlen, encryptedData, dataSize);
     if(resultLen <= 0){
         qCritical() << "Could not decrypt: " << ERR_error_string(ERR_get_error(), NULL);
+        free(out);
         return buffer;
     }
 
     buffer = QByteArray::fromRawData((const char*)out, outlen);
+    free(out);
 
     return buffer;
 }
@@ -166,21 +171,28 @@ QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
     int c_len = len + AES_BLOCK_SIZE, f_len = 0;
     unsigned char *ciphertext = (unsigned char*)malloc(c_len);
 
+    if (!ciphertext){
+        /* malloc failure */
+    }
+
     if(!EVP_EncryptInit_ex(ctx, NULL, NULL, NULL, NULL))
     {
         qCritical() << "EVP_EncryptInit_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        free(ciphertext);
         return QByteArray();
     }
 
     if(!EVP_EncryptUpdate(ctx, ciphertext, &c_len, (unsigned char *)input, len))
     {
         qCritical() << "EVP_EncryptUpdate() error: " << ERR_error_string(ERR_get_error(), NULL);
+        free(ciphertext);
         return QByteArray();
     }
 
     if(!EVP_EncryptFinal(ctx, ciphertext + c_len, &f_len))
     {
         qCritical() << "EVP_EncryptFinal() error: " << ERR_error_string(ERR_get_error(), NULL);
+        free(ciphertext);
         return QByteArray();
     }
 
@@ -188,6 +200,7 @@ QByteArray Cipher::encryptAES(QByteArray passphrase, QByteArray &data)
     EVP_CIPHER_CTX_cipher(ctx);
 
     QByteArray encrypted = QByteArray(reinterpret_cast<char*>(ciphertext), len);
+    free(ciphertext);
     QByteArray finished;
     finished.append("Salted__");
     finished.append(msalt);
@@ -240,15 +253,21 @@ QByteArray Cipher::decryptAES(QByteArray passphrase, QByteArray &data)
     int p_len = len, f_len = 0;
     unsigned char *plaintext = (unsigned char *)malloc(p_len + AES_BLOCK_SIZE);
 
+    if (!plaintext){
+        /* malloc failure */
+    }
+
     if(!EVP_DecryptUpdate(de, plaintext, &p_len, (unsigned char*)input, len))
     {
         qCritical() << "EVP_DecryptUpdate() error: " << ERR_error_string(ERR_get_error(), NULL);
+        free(plaintext);
         return QByteArray();
     }
 
     if(!EVP_DecryptFinal_ex(de, plaintext + p_len, &f_len))
     {
         qCritical() << "EVP_DecryptFinal_ex() error: " << ERR_error_string(ERR_get_error(), NULL);
+        free(plaintext);
         return QByteArray();
     }
 
@@ -256,6 +275,7 @@ QByteArray Cipher::decryptAES(QByteArray passphrase, QByteArray &data)
     EVP_CIPHER_CTX_cleanup(de);
 
     QByteArray decrypted = QByteArray(reinterpret_cast<char *>(plaintext), len);
+    free(plaintext);
 
     return decrypted;
 
