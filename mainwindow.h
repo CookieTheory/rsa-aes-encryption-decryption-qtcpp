@@ -45,6 +45,8 @@ private slots:
 
     void on_button_saveFileAES_clicked();
 
+    void on_button_encryptAES_clicked();
+
 private:
     Ui::MainWindow *ui;
 

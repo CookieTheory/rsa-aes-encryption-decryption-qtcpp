@@ -295,7 +295,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPlainTextEdit" name="textEdit_input_2"/>
+           <widget class="QPlainTextEdit" name="textEdit_input_AES"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -413,7 +413,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QTextBrowser" name="textEdit_output_2"/>
+           <widget class="QTextBrowser" name="textEdit_output_AES"/>
           </item>
           <item>
            <widget class="QPushButton" name="button_saveFileAES">

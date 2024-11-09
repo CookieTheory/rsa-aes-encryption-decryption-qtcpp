@@ -192,7 +192,7 @@ void MainWindow::on_button_openFileAES_clicked()
     Cipher cWrapper;
     QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), FILEFILTERS);
     QByteArray data = cWrapper.readFile(fp);
-    ui->textEdit_input_2->setPlainText(QString::fromUtf8(data));
+    ui->textEdit_input_AES->setPlainText(QString::fromUtf8(data));
 }
 
 #endif
@@ -210,7 +210,7 @@ void MainWindow::on_button_loadKeyAES_clicked()
 void MainWindow::on_button_saveFileAES_clicked()
 {
     Cipher cWrapper;
-    QByteArray data = ui->textEdit_output_2->toPlainText().toUtf8();
+    QByteArray data = ui->textEdit_output_AES->toPlainText().toUtf8();
     if(data.isEmpty()) return;
     QString selectedFilter = DEFAULTFILEFILTER;
     QString filterHumanReadable;
@@ -219,5 +219,24 @@ void MainWindow::on_button_saveFileAES_clicked()
     filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
     if (saveFile.split(".").length() < 2) saveFile.append(filterHumanReadable);
     cWrapper.writeFile(saveFile, data);
+}
+
+
+void MainWindow::on_button_encryptAES_clicked()
+{
+    Cipher cWrapper;
+    QByteArray key;
+    if(!AESBuffer.isNull()){
+        key = AESBuffer;
+    }
+    else key = cWrapper.randomBytes(8).toBase64();
+    QByteArray data = ui->textEdit_input_AES->toPlainText().toUtf8();
+    QByteArray encrypted = cWrapper.encryptAES(key, data).toBase64();
+
+    QByteArray ed;
+    ed.append(key);
+    ed.append(encrypted);
+
+    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(ed, ed.length()));
 }
 
