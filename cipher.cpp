@@ -133,7 +133,7 @@ QByteArray Cipher::decryptRSA(EVP_PKEY *key, QByteArray &data)
     }
 
     buffer = QByteArray::fromRawData((const char*)out, outlen);
-    free(out);
+    //free(out);
 
     return buffer;
 }
