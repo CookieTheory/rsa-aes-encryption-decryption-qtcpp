@@ -72,6 +72,7 @@ void MainWindow::on_button_encrypt_clicked()
     EVP_PKEY* publickey = cWrapper.getPublicKey(key);
     QByteArray data = ui->textEdit_input->toPlainText().toUtf8();
     QByteArray ed = cWrapper.encryptRSA(publickey, data).toBase64();
+    qDebug() << "encrypted: " + ed;
     cWrapper.freeEVPKey(publickey);
     ui->textEdit_output->setPlainText(QString::fromUtf8(ed, ed.length()));
 }
@@ -87,12 +88,16 @@ void MainWindow::on_button_decrypt_clicked()
         BasicCustomDialog dialog(this, "Error", "No key selected");
         dialog.exec();
     }
+    qDebug() << "keyBuffer: " + keyBuffer;
     EVP_PKEY* privatekey = cWrapper.getPrivateKey(key);
     QByteArray data = ui->textEdit_input->toPlainText().toUtf8();
+    qDebug() << "encrypted base 64:" + data;
     QByteArray encrypted = QByteArray::fromBase64(data);
+    qDebug() << "encrypted raw:" + encrypted;
     QByteArray decrypted = cWrapper.decryptRSA(privatekey, encrypted);
-    cWrapper.freeEVPKey(privatekey);
+    qDebug() << "decrypted :" + QString::fromUtf8(decrypted);
     ui->textEdit_output->setPlainText(QString::fromUtf8(decrypted));
+    cWrapper.freeEVPKey(privatekey);
 }
 
 void MainWindow::on_button_loadKey_clicked()

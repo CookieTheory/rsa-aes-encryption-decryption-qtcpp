@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //testAES();
-    testCombined();
+    //testCombined();
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         auto choice = QMessageBox::critical(nullptr, QObject::tr("Systray"),
