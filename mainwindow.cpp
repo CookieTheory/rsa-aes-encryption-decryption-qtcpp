@@ -88,14 +88,10 @@ void MainWindow::on_button_decrypt_clicked()
         BasicCustomDialog dialog(this, "Error", "No key selected");
         dialog.exec();
     }
-    qDebug() << "keyBuffer: " + keyBuffer;
     EVP_PKEY* privatekey = cWrapper.getPrivateKey(key);
     QByteArray data = ui->textEdit_input->toPlainText().toUtf8();
-    qDebug() << "encrypted base 64:" + data;
     QByteArray encrypted = QByteArray::fromBase64(data);
-    qDebug() << "encrypted raw:" + encrypted;
     QByteArray decrypted = cWrapper.decryptRSA(privatekey, encrypted);
-    qDebug() << "decrypted :" + QString::fromUtf8(decrypted);
     ui->textEdit_output->setPlainText(QString::fromUtf8(decrypted));
     cWrapper.freeEVPKey(privatekey);
 }
@@ -230,6 +226,7 @@ void MainWindow::on_button_saveFileAES_clicked()
 void MainWindow::on_button_encryptAES_clicked()
 {
     Cipher cWrapper;
+    QString filterHumanReadable, selectedFilter = DEFAULTKEYFILTER;
     QByteArray key;
     if(!AESBuffer.isNull()){
         key = AESBuffer;
@@ -238,10 +235,33 @@ void MainWindow::on_button_encryptAES_clicked()
     QByteArray data = ui->textEdit_input_AES->toPlainText().toUtf8();
     QByteArray encrypted = cWrapper.encryptAES(key, data).toBase64();
 
-    QByteArray ed;
-    ed.append(key);
-    ed.append(encrypted);
+    if(AESBuffer.isNull()){
+        QString fpAES = QFileDialog::getSaveFileName(this, "Choose save location for AES key", QDir::homePath(), KEYFILTERS, &selectedFilter);
+        if (fpAES.isEmpty()) return;
+        filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+        if (fpAES.split(".").length() < 2) fpAES.append(filterHumanReadable);
+        cWrapper.writeFile(fpAES, key);
+    }
 
-    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(ed, ed.length()));
+    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(encrypted, encrypted.length()));
+}
+
+
+void MainWindow::on_button_decryptAES_clicked()
+{
+    Cipher cWrapper;
+    QByteArray key;
+    if(!AESBuffer.isNull()){
+        key = AESBuffer;
+    }
+    else {
+        BasicCustomDialog dialog(this, "Error", "No key selected");
+        dialog.exec();
+        return;
+    }
+    QByteArray data = ui->textEdit_input_AES->toPlainText().toUtf8();
+    QByteArray encrypted = QByteArray::fromBase64(data);
+    QByteArray decrypted = cWrapper.decryptAES(key, encrypted);
+    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(decrypted));
 }
 
