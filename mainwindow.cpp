@@ -265,3 +265,16 @@ void MainWindow::on_button_decryptAES_clicked()
     ui->textEdit_output_AES->setPlainText(QString::fromUtf8(decrypted));
 }
 
+
+void MainWindow::on_button_keyGenerationAES_clicked()
+{
+    Cipher cWrapper;
+    QString filterHumanReadable, selectedFilter = DEFAULTKEYFILTER;
+    QByteArray key = cWrapper.randomBytes(8).toBase64();
+    QString fpAES = QFileDialog::getSaveFileName(this, "Choose save location for AES key", QDir::homePath(), KEYFILTERS, &selectedFilter);
+    if (fpAES.isEmpty()) return;
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (fpAES.split(".").length() < 2) fpAES.append(filterHumanReadable);
+    cWrapper.writeFile(fpAES, key);
+}
+
