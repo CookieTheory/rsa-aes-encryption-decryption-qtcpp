@@ -51,6 +51,16 @@ private slots:
 
     void on_button_keyGenerationAES_clicked();
 
+    void on_button_combinedOpenFile_clicked();
+
+    void on_button_combinedLoadKey_clicked();
+
+    void on_button_combinedDeleteKey_clicked();
+
+    void on_combinedEncryptButton_clicked();
+
+    void on_combinedDecryptbutton_clicked();
+
 private:
     Ui::MainWindow *ui;
 

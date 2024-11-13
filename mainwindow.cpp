@@ -14,6 +14,7 @@
 
 QByteArray keyBuffer;
 QByteArray AESBuffer;
+QByteArray combinedBuffer;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -276,5 +277,110 @@ void MainWindow::on_button_keyGenerationAES_clicked()
     filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
     if (fpAES.split(".").length() < 2) fpAES.append(filterHumanReadable);
     cWrapper.writeFile(fpAES, key);
+}
+
+/**
+ * @chapter Combined algorithms
+ */
+
+void MainWindow::on_button_combinedOpenFile_clicked()
+{
+    Cipher cWrapper;
+    QString fp = QFileDialog::getOpenFileName(this, "Open file to encrypt", QDir::homePath(), FILEFILTERS);
+    QByteArray data = cWrapper.readFile(fp);
+    ui->textEdit_combinedInput->setPlainText(QString::fromUtf8(data));
+}
+
+
+void MainWindow::on_button_combinedLoadKey_clicked()
+{
+    Cipher cWrapper;
+    QString fp = QFileDialog::getOpenFileName(this, "Open public or private key", QDir::homePath(), KEYFILTERS);
+    ui->textBrowser_combinedKeyPath->setPlainText(fp);
+    QByteArray data = cWrapper.readFile(fp);
+    combinedBuffer = data;
+}
+
+
+void MainWindow::on_button_combinedDeleteKey_clicked()
+{
+    combinedBuffer = NULL;
+    ui->textBrowser_combinedKeyPath->setPlainText("");
+}
+
+
+void MainWindow::on_combinedEncryptButton_clicked()
+{
+    Cipher cWrapper;
+    QByteArray key;
+    if(!combinedBuffer.isNull()){
+        key = combinedBuffer;
+    }
+    else {
+        BasicCustomDialog dialog(this, "Error", "No key selected");
+        dialog.exec();
+        return;
+    }
+    EVP_PKEY* publicKey = cWrapper.getPublicKey(key);
+    QByteArray passphrase = cWrapper.randomBytes(8).toBase64();
+    QByteArray encryptedKey = cWrapper.encryptRSA(publicKey, passphrase);
+    QByteArray data = ui->textEdit_combinedInput->toPlainText().toUtf8();
+    QByteArray encrypted = cWrapper.encryptAES(passphrase, data);
+
+    QByteArray encryptedData;
+    encryptedData.append(encryptedKey);
+    encryptedData.append(encrypted);
+    cWrapper.freeEVPKey(publicKey);
+/*
+    QByteArray test = encryptedData.toBase64();
+    QString filterHumanReadable, selectedFilter = DEFAULTFILEFILTER;
+    QString fpAES = QFileDialog::getSaveFileName(this, "Choose save location for encrypted file", QDir::homePath(), FILEFILTERS, &selectedFilter);
+    if (fpAES.isEmpty()) return;
+    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
+    if (fpAES.split(".").length() < 2) fpAES.append(filterHumanReadable);
+    cWrapper.writeFile(fpAES, test);*/
+    qDebug() << "Encrypted data length: " << encrypted.length();
+    ui->textEdit_combinedOutput->setPlainText(QString::fromUtf8(encryptedData.toBase64(), encryptedData.length()));
+}
+
+
+void MainWindow::on_combinedDecryptbutton_clicked()
+{
+    Cipher cWrapper;
+    QByteArray key;
+    if(!combinedBuffer.isNull()){
+        key = combinedBuffer;
+    }
+    else {
+        BasicCustomDialog dialog(this, "Error", "No key selected");
+        dialog.exec();
+        return;
+    }
+    EVP_PKEY* privateKey = cWrapper.getPrivateKey(key);
+    QByteArray utf8 = ui->textEdit_combinedInput->toPlainText().toUtf8();
+    qDebug() << utf8;
+    QByteArray data = QByteArray::fromBase64(utf8);
+
+
+    //Load the encrypted key from the file'
+    qDebug() << data.length();
+    QByteArray header("Salted__");
+    int pos = data.indexOf(header);
+    if(pos == -1)
+    {
+        qCritical () << "Could not find the beginning of the encrypted file";
+        return;
+    }
+
+    qDebug() << header << " found at" << pos;
+    qDebug() << "data length: " << data.length();
+
+    QByteArray encryptedKey = data.mid(0,pos);
+    QByteArray encryptedData = data.mid(pos);
+    qDebug() << "Encrypted data length: " << encryptedData.length();
+    QByteArray passphrase = cWrapper.decryptRSA(privateKey, encryptedKey);
+    cWrapper.freeEVPKey(privateKey);
+    QByteArray decrypted = cWrapper.decryptAES(passphrase, encryptedData);
+    ui->textEdit_combinedOutput->setPlainText(QString::fromUtf8(decrypted));
 }
 
