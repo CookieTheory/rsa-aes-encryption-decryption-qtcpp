@@ -73,9 +73,8 @@ void MainWindow::on_button_encrypt_clicked()
     EVP_PKEY* publickey = cWrapper.getPublicKey(key);
     QByteArray data = ui->textEdit_input->toPlainText().toUtf8();
     QByteArray ed = cWrapper.encryptRSA(publickey, data).toBase64();
-    qDebug() << "encrypted: " + ed;
     cWrapper.freeEVPKey(publickey);
-    ui->textEdit_output->setPlainText(QString::fromUtf8(ed, ed.length()));
+    ui->textEdit_output->setPlainText(QString::fromUtf8(ed));
 }
 
 void MainWindow::on_button_decrypt_clicked()
@@ -244,7 +243,7 @@ void MainWindow::on_button_encryptAES_clicked()
         cWrapper.writeFile(fpAES, key);
     }
 
-    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(encrypted, encrypted.length()));
+    ui->textEdit_output_AES->setPlainText(QString::fromUtf8(encrypted));
 }
 
 
@@ -331,16 +330,7 @@ void MainWindow::on_combinedEncryptButton_clicked()
     encryptedData.append(encryptedKey);
     encryptedData.append(encrypted);
     cWrapper.freeEVPKey(publicKey);
-/*
-    QByteArray test = encryptedData.toBase64();
-    QString filterHumanReadable, selectedFilter = DEFAULTFILEFILTER;
-    QString fpAES = QFileDialog::getSaveFileName(this, "Choose save location for encrypted file", QDir::homePath(), FILEFILTERS, &selectedFilter);
-    if (fpAES.isEmpty()) return;
-    filterHumanReadable = selectedFilter.split("*").constLast().split(")").constFirst();
-    if (fpAES.split(".").length() < 2) fpAES.append(filterHumanReadable);
-    cWrapper.writeFile(fpAES, test);*/
-    qDebug() << "Encrypted data length: " << encrypted.length();
-    ui->textEdit_combinedOutput->setPlainText(QString::fromUtf8(encryptedData.toBase64(), encryptedData.length()));
+    ui->textEdit_combinedOutput->setPlainText(QString::fromUtf8(encryptedData.toBase64()));
 }
 
 
@@ -358,12 +348,10 @@ void MainWindow::on_combinedDecryptbutton_clicked()
     }
     EVP_PKEY* privateKey = cWrapper.getPrivateKey(key);
     QByteArray utf8 = ui->textEdit_combinedInput->toPlainText().toUtf8();
-    qDebug() << utf8;
     QByteArray data = QByteArray::fromBase64(utf8);
 
 
     //Load the encrypted key from the file'
-    qDebug() << data.length();
     QByteArray header("Salted__");
     int pos = data.indexOf(header);
     if(pos == -1)
@@ -372,12 +360,8 @@ void MainWindow::on_combinedDecryptbutton_clicked()
         return;
     }
 
-    qDebug() << header << " found at" << pos;
-    qDebug() << "data length: " << data.length();
-
     QByteArray encryptedKey = data.mid(0,pos);
     QByteArray encryptedData = data.mid(pos);
-    qDebug() << "Encrypted data length: " << encryptedData.length();
     QByteArray passphrase = cWrapper.decryptRSA(privateKey, encryptedKey);
     cWrapper.freeEVPKey(privateKey);
     QByteArray decrypted = cWrapper.decryptAES(passphrase, encryptedData);
