@@ -73,6 +73,12 @@ void MainWindow::on_button_encrypt_clicked()
     EVP_PKEY* publickey = cWrapper.getPublicKey(key);
     QByteArray data = ui->textEdit_input->toPlainText().toUtf8();
     QByteArray ed = cWrapper.encryptRSA(publickey, data).toBase64();
+    if(QByteArray::fromBase64(ed).contains("ERROR")){
+        cWrapper.freeEVPKey(publickey);
+        BasicCustomDialog dialog(this, "Error", QByteArray::fromBase64(ed));
+        dialog.exec();
+        return;
+    }
     cWrapper.freeEVPKey(publickey);
     ui->textEdit_output->setPlainText(QString::fromUtf8(ed));
 }

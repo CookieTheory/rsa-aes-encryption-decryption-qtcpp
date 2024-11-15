@@ -87,7 +87,7 @@ QByteArray Cipher::encryptRSA(EVP_PKEY *key, QByteArray &data)
     if(resultLen <= 0) {
         qCritical() << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL);
         free(out);
-        return buffer;
+        return "ERROR: Wrong keytype or data too large!";
     }
 
     buffer = QByteArray(reinterpret_cast<char*>(out), outlen);
