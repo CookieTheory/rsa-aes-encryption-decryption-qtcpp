@@ -283,10 +283,11 @@ QByteArray Cipher::decryptAES(QByteArray passphrase, QByteArray &data)
 
 QByteArray Cipher::randomBytes(int size)
 {
-    unsigned char arr[size];
-    RAND_bytes(arr, size);
+    //unsigned char arr[size];
+    std::vector<unsigned char> arr(size);
+    RAND_bytes(arr.data(), size);
 
-    QByteArray ranBytes = QByteArray(reinterpret_cast<char*>(arr), size);
+    QByteArray ranBytes = QByteArray(reinterpret_cast<char*>(arr.data()), size);
     return ranBytes;
 }
 
