@@ -13,6 +13,8 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
+#set(OPENSSL_MSVC_STATIC_RT ON)
+set(BUILD_SHARED_LIBS OFF)
 set(OPENSSL_ROOT_DIR /home/cookie/Documents/Libraries/openssl)
 find_package(OpenSSL REQUIRED)
 
