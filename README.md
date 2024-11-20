@@ -4,7 +4,7 @@ This multi-platform app, `rsa-aes-encryption-decryption-qtcpp`, is openssl app r
 
 ## Installation
 
-Please download one of the binaries from the TBA[Releases]() page. Currently available platforms are Windows and Linux with Mac support coming soon. If you would like to build `rsa-aes-encryption-decryption-qtcpp` from source instead, see TBA[BUILDING.md]().
+Please download one of the binaries from the [Releases](https://github.com/CookieTheory/rsa-aes-encryption-decryption-qtcpp/releases) page. Currently available platforms are Windows and Linux with Mac support coming soon. If you would like to build `rsa-aes-encryption-decryption-qtcpp` from source instead, see TBA[BUILDING.md]().
 
 ## Usage
 
